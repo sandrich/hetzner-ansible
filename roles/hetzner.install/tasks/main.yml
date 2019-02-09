@@ -1,2 +1,71 @@
 ---
-# tasks file for hetzner.install
+# defaults file for hetzner.install
+- name: run installimage 
+  shell: /root/.oldroot/nfs/install/installimage -a -n {{ hostname }} -b {{ bootloader }} -r {{ raid_enable }} -l {{ raid_type }} -i {{ image }} -p {{ partitions | join(',') }} -v {{ lvm | join(',') }}
+  register: result
+
+- name: reboot server
+  reboot:
+
+- name: remove server from local known_hosts file
+  local_action: command  /usr/bin/ssh-keygen -R {{ inventory_hostname }}
+  ignore_errors: True
+
+- name: Update packages
+  yum:
+    name: "*"
+    state: latest
+  tags:
+    - configure
+
+- name: create user chris
+  user:
+    name: chris
+    state: present
+    groups: wheel
+    shell: /bin/bash
+  tags:
+    - configure
+
+- name: add id_rsa.pub to users
+  authorized_key: 
+    user: "{{ item }}" 
+    key: "{{ public_key }}"
+  with_items: 
+    - root
+    - chris
+  tags:
+    - configure
+
+- name: copy .gitconfig into root and chris user
+  copy: 
+    src: files/gitconfig 
+    dest: ~{{ item }}/.gitconfig
+  with_items: 
+    - root
+    - chris
+  tags:
+    - configure
+
+- name: install minimal toolset
+  yum:
+    name:
+      - vim
+  tags:
+    - configure
+
+- name: Set console LANG
+  lineinfile:
+    path: ~{{ item }}/.bashrc
+    regexp: '^export LANG='
+    line: 'export LANG=en_US.UTF-8'
+  with_items: 
+    - root
+    - chris
+  tags:
+    - configure
+
+- name: reboot server
+  reboot:
+  tags:
+    - configure

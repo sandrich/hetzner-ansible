@@ -1,2 +1,14 @@
 ---
 # defaults file for hetzner.install
+bootloader: grub
+raid_enable: yes
+raid_type: 1
+image: /root/images/CentOS-76-64-minimal.tar.gz
+partitions:
+  - /boot:ext4:512M
+  - lvm:vg0:150G
+  - lvm:vg_thin:all
+lvm:
+  - vg0:root:/:xfs:50G
+  - vg0:swap:swap:swap:6G
+  - vg0:tmp:/tmp:xfs:5G

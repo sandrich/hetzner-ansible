@@ -1,0 +1,15 @@
+---
+- name: Reset Hetzer host
+  hosts: servers
+  connection: local
+  vars_files:
+    - secrets.yml
+  roles:
+    - hetzner.rescue
+
+- name: Install Hetzer host
+  hosts: servers  
+  vars_files:
+    - secrets.yml
+  roles:
+    - hetzner.install
