@@ -51,6 +51,15 @@
   yum:
     name:
       - vim
+      - firewalld
+  tags:
+    - configure
+
+- name: start firewalld
+  systemd:
+    name: firewalld
+    state: started
+    enabled: true
   tags:
     - configure
 

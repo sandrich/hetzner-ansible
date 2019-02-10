@@ -13,3 +13,16 @@
     - secrets.yml
   roles:
     - hetzner.install
+  tags:
+    - install
+
+- name: Install openvpn
+  hosts: servers
+  gather_facts: true
+  vars:
+    openvpn_client_register_dns: false
+  roles:
+    - { role: kyl191.openvpn, clients: [macbook] }
+  tags:
+    - install
+    - openvpn
