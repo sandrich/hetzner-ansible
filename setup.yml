@@ -51,3 +51,12 @@
   tags:
     - install
     - k8s
+
+- name: Install Kubernetes apps
+  hosts: servers
+  roles:
+    - andrewrothstein.kubernetes-helm
+  tags:
+    - install
+    - k8s
+    - k8s-tools

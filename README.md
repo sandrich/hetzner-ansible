@@ -7,3 +7,4 @@
 * installs openvpn
 * installs fail2ban
 * installs kubernetes
+* installs Helm charts
