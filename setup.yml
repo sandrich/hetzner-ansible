@@ -26,3 +26,28 @@
   tags:
     - install
     - openvpn
+
+- name: Install fail2ban
+  hosts: servers
+  vars:
+  roles:
+    - robertdebock.fail2ban
+  tags:
+    - install
+    - fail2ban
+
+- name: Install Kubernetes
+  hosts: servers
+  vars:
+    kubernetes_allow_pods_on_master: True
+    kubernetes_pod_network_cidr: 10.244.0.0/16
+    kubernetes_version: '1.13'
+    kubernetes_version_rhel_package: '1.13.3'
+    swap_file_state: absent
+  roles:
+    - geerlingguy.docker
+    - geerlingguy.swap
+    - geerlingguy.kubernetes
+  tags:
+    - install
+    - k8s

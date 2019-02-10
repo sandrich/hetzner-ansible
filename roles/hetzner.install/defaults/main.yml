@@ -10,5 +10,4 @@ partitions:
   - lvm:vg_thin:all
 lvm:
   - vg0:root:/:xfs:50G
-  - vg0:swap:swap:swap:6G
   - vg0:tmp:/tmp:xfs:5G

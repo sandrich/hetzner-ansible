@@ -51,13 +51,15 @@
   yum:
     name:
       - vim
-      - firewalld
+      - iptables
+      - iptables-services
+      - git
   tags:
     - configure
 
-- name: start firewalld
+- name: start iptables
   systemd:
-    name: firewalld
+    name: iptables
     state: started
     enabled: true
   tags:
