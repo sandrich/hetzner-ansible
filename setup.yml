@@ -6,9 +6,12 @@
     - secrets.yml
   roles:
     - hetzner.rescue
+  tags:
+    - install
 
 - name: Install Hetzer host
-  hosts: servers  
+  hosts: servers 
+  gather_facts: true 
   vars_files:
     - secrets.yml
   roles:
@@ -16,47 +19,83 @@
   tags:
     - install
 
-- name: Install openvpn
-  hosts: servers
-  gather_facts: true
-  vars:
-    openvpn_client_register_dns: false
-  roles:
-    - { role: kyl191.openvpn, clients: [macbook] }
-  tags:
-    - install
-    - openvpn
+#- name: Install openvpn
+#  hosts: servers
+#  gather_facts: true
+#  vars:
+#    openvpn_client_register_dns: false
+#  roles:
+#    - { role: kyl191.openvpn, clients: [macbook] }
+#  tags:
+#    - install
+#    - openvpn
 
-- name: Install fail2ban
-  hosts: servers
-  vars:
-  roles:
-    - robertdebock.fail2ban
-  tags:
-    - install
-    - fail2ban
+#- name: Install fail2ban
+#  hosts: servers
+#  vars:
+#    security_autoupdate_enabled: false
+#    security_ssh_permit_root_login: "without-password"
+#  roles:
+#    - geerlingguy.security
+#  tags:
+#    - install
+#    - fail2ban
 
+- name: Setup k8s prerequisites
+  hosts: servers
+  tasks:
+    - name: Setup docker
+      yum:
+        name: docker
+        state: latest
+    - name: Start and enable docker
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+    - name: Set sysctl net.bridge.bridge-nf-call-iptables
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        state: present
+    - name: Set sysctl net.ipv4.ip_forward
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+        state: present
+  tags:
+    - k8s
+    - k8s-install
+    - k8s-prereq
+  
 - name: Install Kubernetes
   hosts: servers
   vars:
     kubernetes_allow_pods_on_master: True
     kubernetes_pod_network_cidr: 10.244.0.0/16
+    kubernetes_yum_arch: x86_64
+    kubernetes_ignore_preflight_errors: []
+    kubernetes_apiserver_advertise_address: 10.10.0.1
     kubernetes_version: '1.13'
     kubernetes_version_rhel_package: '1.13.3'
     swap_file_state: absent
   roles:
-    - geerlingguy.docker
     - geerlingguy.swap
     - geerlingguy.kubernetes
   tags:
-    - install
     - k8s
+    - k8s-install
 
 - name: Install Kubernetes apps
   hosts: servers
   roles:
     - andrewrothstein.kubernetes-helm
   tags:
-    - install
     - k8s
     - k8s-tools
+
+- import_playbook: configure-k8s.yml
+  tags:
+    - k8s
+    - k8s-tools
+    - k8s-webapps

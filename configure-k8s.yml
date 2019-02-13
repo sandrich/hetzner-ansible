@@ -1,0 +1,5 @@
+- name: configure Kubernetes apps
+  hosts: servers
+  tasks:
+    - name: Install voyager
+      shell:  curl -fsSL https://raw.githubusercontent.com/appscode/voyager/8.0.1/hack/deploy/voyager.sh | bash -s -- --provider=baremetal --run-on-master
