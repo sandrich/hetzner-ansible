@@ -1,0 +1,30 @@
+---
+# tasks file for hetzner.fail2ban
+- name: Install fail2ban / firewalld
+  yum:
+    name:
+      - firewalld
+      - fail2ban
+    state: latest
+
+- name: Create config files
+  template:
+    src: local.conf.j2
+    dest: /etc/fail2ban/jail.d/local.conf
+  
+- template:
+    src: firewalld.conf.j2
+    dest: /etc/fail2ban/jail.d/00-firewalld.conf
+
+- template:
+    src: systemd.conf.j2
+    dest: /etc/fail2ban/jail.d/00-systemd.conf
+
+- name: Start and enable firewalld / fail2ban
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - firewalld
+    - fail2ban

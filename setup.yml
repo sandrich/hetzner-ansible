@@ -99,3 +99,11 @@
     - k8s
     - k8s-tools
     - k8s-webapps
+
+- name: Install fail2ban
+  hosts: servers
+  roles:
+    - hetzner.fail2ban
+  tags:
+    - install
+    - fail2ban
