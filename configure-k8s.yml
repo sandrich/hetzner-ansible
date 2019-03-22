@@ -3,3 +3,71 @@
   tasks:
     - name: Install voyager
       shell:  curl -fsSL https://raw.githubusercontent.com/appscode/voyager/8.0.1/hack/deploy/voyager.sh | bash -s -- --provider=baremetal --run-on-master
+    
+    - name: Create thinpool
+      lvol:
+        vg: vg_thin
+        thinpool: tp_k8s_volumes
+        size: 500G
+      tags:
+        - thinpool
+    
+    - name: Create 1,5,10G thin volumes
+      lvol:
+        vg: vg_thin
+        lv: "lv-{{ item[0] }}g-{{ item[1] }}"
+        thinpool: tp_k8s_volumes
+        size: "{{ item[0] }}G"
+      with_nested:
+        - [1,5,10]
+        - "{{ range(1,11) | list }}"
+      tags:
+        - thinpool
+    
+    - name: Format volumes
+      filesystem:
+        fstype: xfs
+        dev: "/dev/vg_thin/lv-{{ item[0] }}g-{{ item[1] }}"
+      with_nested:
+        - [1,5,10]
+        - "{{ range(1,11) | list }}"
+      tags:
+        - thinpool
+
+    - name: Setup mountpoints
+      file:
+        dest: /mnt/k8s-volumes/hdd/{{ item[0] }}g-{{ item[1] }}
+        state: directory
+      with_nested:
+        - [1,5,10]
+        - "{{ range(1,11) | list }}"
+      tags:
+        - thinpool
+    
+    - name: Mount volumes
+      mount:
+        src: "/dev/vg_thin/lv-{{ item[0] }}g-{{ item[1] }}"
+        path: /mnt/k8s-volumes/hdd/{{ item[0] }}g-{{ item[1] }}
+        fstype: xfs
+        state: mounted
+      with_nested:
+          - [1,5,10]
+          - "{{ range(1,11) | list }}"
+      tags:
+        - thinpool
+
+    - copy:
+        src: files/{{ item }}
+        dest: /tmp/{{ item }}
+      with_items:
+        - storageclass.yml
+        - provisioner.yml
+      tags:
+        - k8s-local-volume
+    
+    - shell: "kubectl apply -f /tmp/{{ item }}"
+      with_items:
+        - storageclass.yml
+        - provisioner.yml
+      tags:
+        - k8s-local-volume

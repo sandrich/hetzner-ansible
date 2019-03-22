@@ -52,27 +52,8 @@
     name:
       - vim
       - git
-      - firewalld
   tags:
     - configure
-
-- name: Start firewalld
-  service:
-    name: firewalld
-    state: started
-    enabled: true
-
-- name: Add ip zones to trusted network
-  firewalld:
-    source: "{{ item }}"
-    zone: trusted
-    state: enabled
-    permanent: yes
-  with_items:
-    - 10.10.0.0/24
-    - 10.244.0.0/24
-    - 10.96.0.0/24
-    - 10.9.0.0/24
 
 - name: Set console LANG
   lineinfile:

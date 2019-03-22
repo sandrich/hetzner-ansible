@@ -55,7 +55,7 @@
     kubernetes_ignore_preflight_errors: []
     kubernetes_apiserver_advertise_address: 10.10.0.1
     kubernetes_version: '1.13'
-    kubernetes_version_rhel_package: '1.13.3'
+    kubernetes_version_rhel_package: '1.13.4'
     swap_file_state: absent
   roles:
     - geerlingguy.swap
@@ -78,43 +78,43 @@
     - k8s-tools
     - k8s-webapps
 
-- name: Install fail2ban
-  hosts: servers
-  roles:
-    - hetzner.fail2ban
-  tags:
-    - install
-    - fail2ban
+# - name: Install fail2ban
+#   hosts: servers
+#   roles:
+#     - hetzner.fail2ban
+#   tags:
+#     - install
+#     - fail2ban
 
-- name: Install openvpn
-  hosts: servers
-  gather_facts: true
-  vars:
-    local_tunnelblick_path: ~/Library/Application Support/Tunnelblick/Configurations/hetzner.tblk/Contents/Resources
-  tasks:
-    - include_role:
-        name: kyl191.openvpn
-      vars:
-        openvpn_client_register_dns: false
-        clients: [macbook] 
+# - name: Install openvpn
+#   hosts: servers
+#   gather_facts: true
+#   vars:
+#     local_tunnelblick_path: ~/Library/Application Support/Tunnelblick/Configurations/hetzner.tblk/Contents/Resources
+#   tasks:
+#     - include_role:
+#         name: kyl191.openvpn
+#       vars:
+#         openvpn_client_register_dns: false
+#         clients: [macbook] 
 
-    - name: Create folder structure
-      local_action:
-        module: file
-        path: "{{ local_tunnelblick_path }}"
-        state: directory
-      run_once: true
-      tags:
-        - openvpn-client
+#     - name: Create folder structure
+#       local_action:
+#         module: file
+#         path: "{{ local_tunnelblick_path }}"
+#         state: directory
+#       run_once: true
+#       tags:
+#         - openvpn-client
 
-    - name: Copy client config
-      local_action:
-        module: copy
-        src: /tmp/ansible/macbook/{{ inventory_hostname }}.ovpn
-        dest: "{{ local_tunnelblick_path }}/config.ovpn"
-      run_once: true
-      tags:
-        - openvpn-client
-  tags:
-    - install
-    - openvpn
+#     - name: Copy client config
+#       local_action:
+#         module: copy
+#         src: /tmp/ansible/macbook/{{ inventory_hostname }}.ovpn
+#         dest: "{{ local_tunnelblick_path }}/config.ovpn"
+#       run_once: true
+#       tags:
+#         - openvpn-client
+#   tags:
+#     - install
+#     - openvpn
